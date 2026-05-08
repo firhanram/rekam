@@ -45,14 +45,10 @@ actor ScreenRecorder {
             throw ScreenRecorderError.writerSetupFailed(error.localizedDescription)
         }
 
-        let pixelScale = Double(filter.pointPixelScale)
-        let scale = configuration.scale
-        let rawWidth = Double(filter.contentRect.width) * pixelScale * scale
-        let rawHeight = Double(filter.contentRect.height) * pixelScale * scale
-        let outputWidth = Int(rawWidth)
-        let outputHeight = Int(rawHeight)
-        let evenWidth = outputWidth - (outputWidth % 2)
-        let evenHeight = outputHeight - (outputHeight % 2)
+        let (evenWidth, evenHeight) = Self.cappedDimensions(
+            filter: filter,
+            cap: configuration.maxLongEdgePixels
+        )
 
         let videoSettings: [String: Any] = [
             AVVideoCodecKey: AVVideoCodecType.hevc,
@@ -199,6 +195,27 @@ actor ScreenRecorder {
         if micAudioInput?.isReadyForMoreMediaData == true {
             micAudioInput?.append(sample)
         }
+    }
+
+    static func cappedDimensions(filter: SCContentFilter, cap: Int?) -> (Int, Int) {
+        let pixelScale = Double(filter.pointPixelScale)
+        let fullWidth = Double(filter.contentRect.width) * pixelScale
+        let fullHeight = Double(filter.contentRect.height) * pixelScale
+
+        var width = fullWidth
+        var height = fullHeight
+        if let cap, cap > 0 {
+            let longEdge = max(width, height)
+            if longEdge > Double(cap) {
+                let ratio = Double(cap) / longEdge
+                width *= ratio
+                height *= ratio
+            }
+        }
+
+        let w = Int(width)
+        let h = Int(height)
+        return (w - (w % 2), h - (h % 2))
     }
 
     private func isCompleteFrame(_ sample: CMSampleBuffer) -> Bool {

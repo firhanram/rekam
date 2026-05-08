@@ -22,15 +22,15 @@ struct CaptureConfiguration: Sendable, Equatable {
     var preset: Preset
     var frameRate: Int
     var averageVideoBitrate: Int
-    var scale: Double
+    var maxLongEdgePixels: Int?
     var captureSystemAudio: Bool
     var captureMicrophone: Bool
 
     static let smaller = CaptureConfiguration(
         preset: .smaller,
         frameRate: 30,
-        averageVideoBitrate: 3_000_000,
-        scale: 0.75,
+        averageVideoBitrate: 1_200_000,
+        maxLongEdgePixels: 1280,
         captureSystemAudio: true,
         captureMicrophone: true
     )
@@ -38,17 +38,17 @@ struct CaptureConfiguration: Sendable, Equatable {
     static let balanced = CaptureConfiguration(
         preset: .balanced,
         frameRate: 30,
-        averageVideoBitrate: 5_000_000,
-        scale: 1.0,
+        averageVideoBitrate: 2_500_000,
+        maxLongEdgePixels: 1920,
         captureSystemAudio: true,
         captureMicrophone: true
     )
 
     static let higher = CaptureConfiguration(
         preset: .higher,
-        frameRate: 60,
-        averageVideoBitrate: 12_000_000,
-        scale: 1.0,
+        frameRate: 30,
+        averageVideoBitrate: 5_000_000,
+        maxLongEdgePixels: 2560,
         captureSystemAudio: true,
         captureMicrophone: true
     )
