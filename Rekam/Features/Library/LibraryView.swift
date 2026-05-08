@@ -13,6 +13,9 @@ struct LibraryView: View {
         }
         .background(AppColors.canvas)
         .task { await viewModel.refresh() }
+        .onReceive(NotificationCenter.default.publisher(for: .rekamRecordingSaved)) { _ in
+            Task { await viewModel.refresh() }
+        }
         .sheet(item: $editingItem) { item in
             TrimEditorView(item: item)
         }

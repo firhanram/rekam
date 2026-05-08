@@ -71,6 +71,7 @@ final class RecordingViewModel {
             lastRecordingURL = finalURL
             state = .idle
             elapsed = 0
+            NotificationCenter.default.post(name: .rekamRecordingSaved, object: finalURL)
         } catch {
             state = .failed(error.localizedDescription)
         }

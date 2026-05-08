@@ -76,13 +76,13 @@ final class TrimEditorViewModel {
         exportedURL = nil
         errorMessage = nil
 
-        let destination = Paths.newExportURL()
         let range = CMTimeRange(
             start: CMTime(seconds: startSeconds, preferredTimescale: 600),
             end: CMTime(seconds: endSeconds, preferredTimescale: 600)
         )
 
         do {
+            let destination = try await ExportDestination.resolve()
             let url = try await trimmer.export(
                 source: item.url,
                 range: range,
@@ -95,6 +95,8 @@ final class TrimEditorViewModel {
             exportProgress = nil
             exportedURL = url
             NSWorkspace.shared.activateFileViewerSelecting([url])
+        } catch ExportDestinationError.cancelled {
+            exportProgress = nil
         } catch {
             exportProgress = nil
             errorMessage = error.localizedDescription

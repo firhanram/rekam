@@ -2,12 +2,16 @@ import SwiftUI
 
 struct RecordingView: View {
     @State private var viewModel = RecordingViewModel()
+    @State private var screenAuthorized: Bool = PermissionsHelper.screenRecordingAuthorized
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: AppSpacing.xl) {
                     header
+                    if !screenAuthorized {
+                        permissionBanner
+                    }
                     presetPicker
                     sourceCard
                     statusCard
@@ -18,6 +22,34 @@ struct RecordingView: View {
             RecordingControls(viewModel: viewModel)
         }
         .background(AppColors.canvas)
+        .onAppear { refreshPermissions() }
+    }
+
+    private var permissionBanner: some View {
+        HStack(spacing: AppSpacing.sm) {
+            Image(systemName: "lock.shield.fill")
+                .foregroundStyle(AppColors.warningText)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Screen recording permission needed")
+                    .font(AppFonts.title)
+                    .foregroundStyle(AppColors.warningText)
+                Text("Grant access in System Settings, then return to Rekam.")
+                    .font(AppFonts.body)
+                    .foregroundStyle(AppColors.warningText.opacity(0.85))
+            }
+            Spacer()
+            Button("Open Settings") {
+                PermissionsHelper.openScreenRecordingSettings()
+            }
+            .buttonStyle(.bordered)
+        }
+        .padding(AppSpacing.md)
+        .background(AppColors.warningBg)
+        .clipShape(RoundedRectangle(cornerRadius: AppSpacing.radiusCard))
+    }
+
+    private func refreshPermissions() {
+        screenAuthorized = PermissionsHelper.screenRecordingAuthorized
     }
 
     private var header: some View {

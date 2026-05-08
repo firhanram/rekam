@@ -40,6 +40,9 @@ struct RecordingControls: View {
         }
         .buttonStyle(.plain)
         .disabled(disableRecord)
+        .keyboardShortcut(viewModel.state.isActive ? .init(".", modifiers: .command) : .init("r", modifiers: .command))
+        .accessibilityLabel(viewModel.state.isActive ? "Stop recording" : "Start recording")
+        .accessibilityHint(viewModel.filter == nil ? "Choose a source first." : "")
     }
 
     private var disableRecord: Bool {
@@ -78,7 +81,8 @@ struct RecordingControls: View {
     }
 
     private func audioToggle(isOn: Binding<Bool>, onIcon: String, offIcon: String) -> some View {
-        Button {
+        let label = onIcon.contains("mic") ? "Microphone" : "System audio"
+        return Button {
             isOn.wrappedValue.toggle()
         } label: {
             Image(systemName: isOn.wrappedValue ? onIcon : offIcon)
@@ -90,6 +94,7 @@ struct RecordingControls: View {
         }
         .buttonStyle(.plain)
         .disabled(viewModel.state.isActive || viewModel.state.isBusy)
+        .accessibilityLabel("\(label) \(isOn.wrappedValue ? "on" : "off")")
     }
 
     private func formatElapsed(_ seconds: TimeInterval) -> String {

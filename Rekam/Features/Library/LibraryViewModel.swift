@@ -38,9 +38,9 @@ final class LibraryViewModel {
         exportingItemID = item.id
         defer { exportingItemID = nil }
 
-        let destination = Paths.newExportURL()
         let range = CMTimeRange(start: .zero, duration: item.duration)
         do {
+            let destination = try await ExportDestination.resolve()
             let url = try await trimmer.export(
                 source: item.url,
                 range: range,
@@ -48,6 +48,8 @@ final class LibraryViewModel {
                 to: destination
             )
             NSWorkspace.shared.activateFileViewerSelecting([url])
+        } catch ExportDestinationError.cancelled {
+            // user dismissed save panel; quietly stop
         } catch {
             errorMessage = error.localizedDescription
         }
