@@ -56,7 +56,8 @@ actor ScreenRecorder {
             AVVideoHeightKey: evenHeight,
             AVVideoCompressionPropertiesKey: [
                 AVVideoAverageBitRateKey: configuration.averageVideoBitrate,
-                AVVideoMaxKeyFrameIntervalDurationKey: 2.0,
+                AVVideoExpectedSourceFrameRateKey: configuration.frameRate,
+                AVVideoMaxKeyFrameIntervalDurationKey: 4.0,
                 AVVideoProfileLevelKey: kVTProfileLevel_HEVC_Main_AutoLevel as String
             ]
         ]
@@ -65,22 +66,29 @@ actor ScreenRecorder {
         if writer.canAdd(videoInput) { writer.add(videoInput) }
         self.videoInput = videoInput
 
-        let audioSettings: [String: Any] = [
+        let systemAudioSettings: [String: Any] = [
             AVFormatIDKey: kAudioFormatMPEG4AAC,
             AVNumberOfChannelsKey: 2,
             AVSampleRateKey: 48_000,
-            AVEncoderBitRateKey: 128_000
+            AVEncoderBitRateKey: 96_000
+        ]
+
+        let micAudioSettings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatMPEG4AAC,
+            AVNumberOfChannelsKey: 1,
+            AVSampleRateKey: 48_000,
+            AVEncoderBitRateKey: 64_000
         ]
 
         if configuration.captureSystemAudio {
-            let input = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)
+            let input = AVAssetWriterInput(mediaType: .audio, outputSettings: systemAudioSettings)
             input.expectsMediaDataInRealTime = true
             if writer.canAdd(input) { writer.add(input) }
             self.systemAudioInput = input
         }
 
         if configuration.captureMicrophone {
-            let input = AVAssetWriterInput(mediaType: .audio, outputSettings: audioSettings)
+            let input = AVAssetWriterInput(mediaType: .audio, outputSettings: micAudioSettings)
             input.expectsMediaDataInRealTime = true
             if writer.canAdd(input) { writer.add(input) }
             self.micAudioInput = input
