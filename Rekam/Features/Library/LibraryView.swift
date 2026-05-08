@@ -3,6 +3,7 @@ import SwiftUI
 
 struct LibraryView: View {
     @State private var viewModel = LibraryViewModel()
+    @State private var editingItem: RecordingItem?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -12,6 +13,9 @@ struct LibraryView: View {
         }
         .background(AppColors.canvas)
         .task { await viewModel.refresh() }
+        .sheet(item: $editingItem) { item in
+            TrimEditorView(item: item)
+        }
     }
 
     private var header: some View {
@@ -33,11 +37,19 @@ struct LibraryView: View {
             ScrollView {
                 LazyVStack(spacing: AppSpacing.sm) {
                     ForEach(viewModel.items) { item in
-                        LibraryRow(
-                            item: item,
-                            isExporting: viewModel.exportingItemID == item.id
-                        )
+                        Button {
+                            editingItem = item
+                        } label: {
+                            LibraryRow(
+                                item: item,
+                                isExporting: viewModel.exportingItemID == item.id
+                            )
+                        }
+                        .buttonStyle(.plain)
                             .contextMenu {
+                                Button("Open in Trim Editor") {
+                                    editingItem = item
+                                }
                                 Button("Export to Downloads") {
                                     Task { await viewModel.exportToDownloads(item) }
                                 }
