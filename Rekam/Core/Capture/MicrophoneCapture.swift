@@ -9,11 +9,13 @@ final class MicrophoneCapture: NSObject, @unchecked Sendable {
     private let queue = DispatchQueue(label: "rekam.mic.capture", qos: .userInitiated)
     private var handler: SampleHandler?
 
-    func start(handler: @escaping SampleHandler) async throws {
+    func start(deviceID: String? = nil, handler: @escaping SampleHandler) async throws {
         try await ensureAuthorization()
         self.handler = handler
 
-        guard let device = AVCaptureDevice.default(for: .audio) else {
+        let resolved = deviceID.flatMap { AVCaptureDevice(uniqueID: $0) }
+            ?? AVCaptureDevice.default(for: .audio)
+        guard let device = resolved else {
             throw NSError(domain: "Rekam.Mic", code: -1,
                           userInfo: [NSLocalizedDescriptionKey: "No audio input device available."])
         }

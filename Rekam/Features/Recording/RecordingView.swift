@@ -13,6 +13,7 @@ struct RecordingView: View {
                         permissionBanner
                     }
                     presetPicker
+                    microphoneCard
                     sourceCard
                     statusCard
                 }
@@ -105,6 +106,79 @@ struct RecordingView: View {
         }
         .buttonStyle(.plain)
         .disabled(viewModel.state.isActive || viewModel.state.isBusy)
+    }
+
+    private var microphoneCard: some View {
+        let micEnabled = viewModel.configuration.captureMicrophone
+        let hasDevices = !viewModel.availableMicrophones.isEmpty
+        let currentName: String = {
+            if let id = viewModel.selectedMicrophoneID,
+               let match = viewModel.availableMicrophones.first(where: { $0.id == id }) {
+                return match.name
+            }
+            return "System default"
+        }()
+
+        return VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            Text("Microphone")
+                .eyebrowStyle()
+            HStack(spacing: AppSpacing.md) {
+                Image(systemName: micEnabled ? "mic.fill" : "mic.slash")
+                    .font(.system(size: 16))
+                    .foregroundStyle(micEnabled ? AppColors.brand : AppColors.textTertiary)
+                    .frame(width: 32, height: 32)
+                    .background(micEnabled ? AppColors.brandTint50 : AppColors.surfacePlus)
+                    .clipShape(RoundedRectangle(cornerRadius: AppSpacing.radiusInput))
+
+                Text(micEnabled ? currentName : "Microphone capture is off")
+                    .font(AppFonts.body)
+                    .foregroundStyle(AppColors.textSecondary)
+                    .lineLimit(1)
+
+                Spacer()
+
+                Menu {
+                    Button {
+                        viewModel.selectedMicrophoneID = nil
+                    } label: {
+                        if viewModel.selectedMicrophoneID == nil {
+                            Label("System default", systemImage: "checkmark")
+                        } else {
+                            Text("System default")
+                        }
+                    }
+                    if !viewModel.availableMicrophones.isEmpty {
+                        Divider()
+                    }
+                    ForEach(viewModel.availableMicrophones) { option in
+                        Button {
+                            viewModel.selectedMicrophoneID = option.id
+                        } label: {
+                            if viewModel.selectedMicrophoneID == option.id {
+                                Label(option.name, systemImage: "checkmark")
+                            } else {
+                                Text(option.name)
+                            }
+                        }
+                    }
+                } label: {
+                    Text("Change…")
+                        .font(AppFonts.body)
+                        .foregroundStyle(AppColors.brand)
+                }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .fixedSize()
+                .disabled(!micEnabled || !hasDevices || viewModel.state.isActive || viewModel.state.isBusy)
+            }
+            .padding(AppSpacing.md)
+            .background(AppColors.surface)
+            .overlay(
+                RoundedRectangle(cornerRadius: AppSpacing.radiusCard)
+                    .stroke(AppColors.border, lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: AppSpacing.radiusCard))
+        }
     }
 
     private var sourceCard: some View {

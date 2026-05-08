@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 import Observation
 import ScreenCaptureKit
@@ -11,11 +12,53 @@ final class RecordingViewModel {
     var sourceLabel: String = "No source selected"
     var lastRecordingURL: URL?
     var elapsed: TimeInterval = 0
+    var availableMicrophones: [MicrophoneOption] = []
 
     @ObservationIgnored private let recorder = ScreenRecorder()
     @ObservationIgnored private let picker = ContentPicker()
     @ObservationIgnored private let store = RecordingStore()
     @ObservationIgnored private var timerTask: Task<Void, Never>?
+    @ObservationIgnored private var deviceObservers: [NSObjectProtocol] = []
+
+    var selectedMicrophoneID: String? {
+        get { configuration.microphoneDeviceID }
+        set { configuration.microphoneDeviceID = newValue }
+    }
+
+    init() {
+        refreshMicrophones()
+        let center = NotificationCenter.default
+        let connect = center.addObserver(
+            forName: AVCaptureDevice.wasConnectedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.refreshMicrophones() }
+        }
+        let disconnect = center.addObserver(
+            forName: AVCaptureDevice.wasDisconnectedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.refreshMicrophones() }
+        }
+        deviceObservers = [connect, disconnect]
+    }
+
+    deinit {
+        for observer in deviceObservers {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    func refreshMicrophones() {
+        availableMicrophones = MicrophoneDevices.available()
+        // If the previously selected device is gone, fall back to system default.
+        if let id = configuration.microphoneDeviceID,
+           !availableMicrophones.contains(where: { $0.id == id }) {
+            configuration.microphoneDeviceID = nil
+        }
+    }
 
     func chooseSource() async {
         do {

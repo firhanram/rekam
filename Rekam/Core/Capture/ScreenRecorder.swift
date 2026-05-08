@@ -125,7 +125,7 @@ actor ScreenRecorder {
         // ----- Microphone -----
         if configuration.captureMicrophone {
             let mic = MicrophoneCapture()
-            try await mic.start { [weak self] sample in
+            try await mic.start(deviceID: configuration.microphoneDeviceID) { [weak self] sample in
                 guard let self else { return }
                 let boxed = UncheckedSample(buffer: sample)
                 Task { await self.handleMicSample(boxed) }

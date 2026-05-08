@@ -25,6 +25,7 @@ struct CaptureConfiguration: Sendable, Equatable {
     var maxLongEdgePixels: Int?
     var captureSystemAudio: Bool
     var captureMicrophone: Bool
+    var microphoneDeviceID: String?
 
     static let smaller = CaptureConfiguration(
         preset: .smaller,
@@ -32,7 +33,8 @@ struct CaptureConfiguration: Sendable, Equatable {
         averageVideoBitrate: 1_200_000,
         maxLongEdgePixels: 1280,
         captureSystemAudio: true,
-        captureMicrophone: true
+        captureMicrophone: true,
+        microphoneDeviceID: nil
     )
 
     static let balanced = CaptureConfiguration(
@@ -41,7 +43,8 @@ struct CaptureConfiguration: Sendable, Equatable {
         averageVideoBitrate: 2_500_000,
         maxLongEdgePixels: 1920,
         captureSystemAudio: true,
-        captureMicrophone: true
+        captureMicrophone: true,
+        microphoneDeviceID: nil
     )
 
     static let higher = CaptureConfiguration(
@@ -50,7 +53,8 @@ struct CaptureConfiguration: Sendable, Equatable {
         averageVideoBitrate: 5_000_000,
         maxLongEdgePixels: 2560,
         captureSystemAudio: true,
-        captureMicrophone: true
+        captureMicrophone: true,
+        microphoneDeviceID: nil
     )
 
     static func from(preset: Preset) -> CaptureConfiguration {
