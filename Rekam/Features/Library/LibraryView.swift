@@ -2,7 +2,7 @@ import CoreMedia
 import SwiftUI
 
 struct LibraryView: View {
-    @State private var viewModel = LibraryViewModel()
+    let viewModel: LibraryViewModel
     @State private var editingItem: RecordingItem?
 
     var body: some View {
@@ -160,6 +160,6 @@ private struct LibraryRow: View {
 }
 
 #Preview {
-    LibraryView()
+    LibraryView(viewModel: LibraryViewModel())
         .frame(width: 720, height: 480)
 }

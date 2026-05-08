@@ -23,6 +23,8 @@ enum SidebarItem: String, CaseIterable, Identifiable {
 
 struct RootView: View {
     @State private var selection: SidebarItem? = .record
+    @State private var recordingViewModel = RecordingViewModel()
+    @State private var libraryViewModel = LibraryViewModel()
 
     var body: some View {
         NavigationSplitView {
@@ -38,9 +40,9 @@ struct RootView: View {
         } detail: {
             switch selection ?? .record {
             case .record:
-                RecordingView()
+                RecordingView(viewModel: recordingViewModel)
             case .library:
-                LibraryView()
+                LibraryView(viewModel: libraryViewModel)
             }
         }
         .background(AppColors.canvas)

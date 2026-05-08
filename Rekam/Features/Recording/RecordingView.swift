@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RecordingView: View {
-    @State private var viewModel = RecordingViewModel()
+    let viewModel: RecordingViewModel
     @State private var screenAuthorized: Bool = PermissionsHelper.screenRecordingAuthorized
 
     var body: some View {
@@ -181,6 +181,6 @@ struct RecordingView: View {
 }
 
 #Preview {
-    RecordingView()
+    RecordingView(viewModel: RecordingViewModel())
         .frame(width: 720, height: 480)
 }

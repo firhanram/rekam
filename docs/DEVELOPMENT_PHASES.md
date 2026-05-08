@@ -17,6 +17,7 @@ The order follows the architecture's "Implementation order" section: build the c
 | 8 | **Encoder tuning** | Encoder hints + audio bitrate retune for additional savings on top of phase 7 | [`phases/08-encoder-tuning.md`](./phases/08-encoder-tuning.md) |
 | 9 | **Rename on export** | Always prompt with NSSavePanel so the user can choose filename and folder | [`phases/09-rename-on-export.md`](./phases/09-rename-on-export.md) |
 | 10 | **Drop `Rekam-` prefix** | Default filenames are just `<timestamp>.mp4` — less noise in Library and save panel | [`phases/10-drop-rekam-prefix.md`](./phases/10-drop-rekam-prefix.md) |
+| 11 | **Keep recording alive on tab switch** | Lift view models to `RootView` so switching to Library doesn't kill an active capture | [`phases/11-keep-recording-alive-on-tab-switch.md`](./phases/11-keep-recording-alive-on-tab-switch.md) |
 
 ## Conventions for each phase doc
 
