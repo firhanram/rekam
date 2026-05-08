@@ -40,23 +40,9 @@ struct RootView: View {
             case .record:
                 RecordingView()
             case .library:
-                LibraryPlaceholder()
+                LibraryView()
             }
         }
-        .background(AppColors.canvas)
-    }
-}
-
-private struct LibraryPlaceholder: View {
-    var body: some View {
-        VStack(spacing: AppSpacing.md) {
-            Text("Library")
-                .eyebrowStyle()
-            Text("Library UI lands in Phase 3")
-                .font(AppFonts.body)
-                .foregroundStyle(AppColors.textTertiary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(AppColors.canvas)
     }
 }

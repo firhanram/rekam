@@ -14,6 +14,7 @@ final class RecordingViewModel {
 
     @ObservationIgnored private let recorder = ScreenRecorder()
     @ObservationIgnored private let picker = ContentPicker()
+    @ObservationIgnored private let store = RecordingStore()
     @ObservationIgnored private var timerTask: Task<Void, Never>?
 
     func chooseSource() async {
@@ -64,8 +65,10 @@ final class RecordingViewModel {
         state = .stopping
         stopTimer()
         do {
-            let url = try await recorder.stop()
-            lastRecordingURL = url
+            let tempURL = try await recorder.stop()
+            let destination = Paths.newRecordingURL()
+            let finalURL = (try? store.move(from: tempURL, to: destination)) ?? tempURL
+            lastRecordingURL = finalURL
             state = .idle
             elapsed = 0
         } catch {
@@ -90,7 +93,7 @@ final class RecordingViewModel {
 
     private func stagingURL() -> URL {
         FileManager.default.temporaryDirectory
-            .appendingPathComponent("rekam-\(Int(Date().timeIntervalSince1970)).mp4")
+            .appendingPathComponent("rekam-staging-\(Int(Date().timeIntervalSince1970)).mp4")
     }
 
     private func describe(filter: SCContentFilter) -> String {
