@@ -13,6 +13,8 @@ The order follows the architecture's "Implementation order" section: build the c
 | 4 | **Trim & Export** | Trim a recording to `[start..end]` and export HEVC `.mp4` to `~/Downloads` | [`phases/04-trim-export.md`](./phases/04-trim-export.md) |
 | 5 | **Editor UI** | `TrimEditorView` with `AVPlayer` preview and dual-handle range slider | [`phases/05-editor-ui.md`](./phases/05-editor-ui.md) |
 | 6 | **Polish & hardening** | Error handling, edge cases, accessibility, app icon, basic perf checks | [`phases/06-polish.md`](./phases/06-polish.md) |
+| 7 | **Resolution cap** | Cap output to per-preset long-edge pixels and retune bitrates to shrink files | [`phases/07-resolution-cap.md`](./phases/07-resolution-cap.md) |
+| 8 | **Encoder tuning** | Encoder hints + audio bitrate retune for additional savings on top of phase 7 | [`phases/08-encoder-tuning.md`](./phases/08-encoder-tuning.md) |
 
 ## Conventions for each phase doc
 
