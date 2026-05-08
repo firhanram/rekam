@@ -33,8 +33,14 @@ struct LibraryView: View {
             ScrollView {
                 LazyVStack(spacing: AppSpacing.sm) {
                     ForEach(viewModel.items) { item in
-                        LibraryRow(item: item)
+                        LibraryRow(
+                            item: item,
+                            isExporting: viewModel.exportingItemID == item.id
+                        )
                             .contextMenu {
+                                Button("Export to Downloads") {
+                                    Task { await viewModel.exportToDownloads(item) }
+                                }
                                 Button("Reveal in Finder") {
                                     viewModel.revealInFinder(item)
                                 }
@@ -67,6 +73,7 @@ struct LibraryView: View {
 
 private struct LibraryRow: View {
     let item: RecordingItem
+    var isExporting: Bool = false
 
     var body: some View {
         HStack(spacing: AppSpacing.md) {
@@ -95,9 +102,15 @@ private struct LibraryRow: View {
 
             Spacer()
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(AppColors.textFaint)
+            if isExporting {
+                ProgressView()
+                    .scaleEffect(0.6)
+                    .controlSize(.small)
+            } else {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(AppColors.textFaint)
+            }
         }
         .padding(AppSpacing.md)
         .background(AppColors.surface)

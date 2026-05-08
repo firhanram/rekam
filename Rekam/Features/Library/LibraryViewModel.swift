@@ -1,4 +1,5 @@
 import AppKit
+import CoreMedia
 import Foundation
 import Observation
 
@@ -8,8 +9,10 @@ final class LibraryViewModel {
     var items: [RecordingItem] = []
     var isLoading = false
     var errorMessage: String?
+    var exportingItemID: RecordingItem.ID?
 
     @ObservationIgnored private let store = RecordingStore()
+    @ObservationIgnored private let trimmer = VideoTrimmer()
 
     func refresh() async {
         isLoading = true
@@ -28,5 +31,25 @@ final class LibraryViewModel {
 
     func revealInFinder(_ item: RecordingItem) {
         NSWorkspace.shared.activateFileViewerSelecting([item.url])
+    }
+
+    func exportToDownloads(_ item: RecordingItem) async {
+        guard exportingItemID == nil else { return }
+        exportingItemID = item.id
+        defer { exportingItemID = nil }
+
+        let destination = Paths.newExportURL()
+        let range = CMTimeRange(start: .zero, duration: item.duration)
+        do {
+            let url = try await trimmer.export(
+                source: item.url,
+                range: range,
+                preset: .passthrough,
+                to: destination
+            )
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
