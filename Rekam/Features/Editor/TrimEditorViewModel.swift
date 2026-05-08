@@ -82,7 +82,8 @@ final class TrimEditorViewModel {
         )
 
         do {
-            let destination = try await ExportDestination.resolve()
+            let suggestedName = item.url.deletingPathExtension().lastPathComponent + "-trim.mp4"
+            let destination = try await ExportDestination.prompt(suggestedName: suggestedName)
             let url = try await trimmer.export(
                 source: item.url,
                 range: range,

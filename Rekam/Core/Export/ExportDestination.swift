@@ -37,11 +37,19 @@ enum ExportDestination {
         }
     }
 
+    /// Always prompts an NSSavePanel pre-targeted at ~/Downloads so the user
+    /// can rename the export and optionally pick a different folder.
+    @MainActor
+    static func prompt(suggestedName: String = defaultName()) async throws -> URL {
+        try await promptSavePanel(suggestedName: suggestedName)
+    }
+
     @MainActor
     private static func promptSavePanel(suggestedName: String) async throws -> URL {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.mpeg4Movie]
         panel.nameFieldStringValue = suggestedName
+        panel.directoryURL = Paths.downloadsDirectory
         panel.canCreateDirectories = true
         panel.isExtensionHidden = false
 

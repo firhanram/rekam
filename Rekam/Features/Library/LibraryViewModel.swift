@@ -40,7 +40,7 @@ final class LibraryViewModel {
 
         let range = CMTimeRange(start: .zero, duration: item.duration)
         do {
-            let destination = try await ExportDestination.resolve()
+            let destination = try await ExportDestination.prompt(suggestedName: item.name)
             let url = try await trimmer.export(
                 source: item.url,
                 range: range,
