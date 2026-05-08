@@ -21,18 +21,17 @@ enum Paths {
     }
 
     static func newRecordingURL(now: Date = Date()) -> URL {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd-HHmmss"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        let name = "Rekam-\(formatter.string(from: now)).mp4"
-        return recordingsDirectory.appendingPathComponent(name)
+        recordingsDirectory.appendingPathComponent(timestampedName(now: now))
     }
 
     static func newExportURL(now: Date = Date()) -> URL {
+        downloadsDirectory.appendingPathComponent(timestampedName(now: now))
+    }
+
+    private static func timestampedName(now: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd-HHmmss"
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        let name = "Rekam-\(formatter.string(from: now)).mp4"
-        return downloadsDirectory.appendingPathComponent(name)
+        return "\(formatter.string(from: now)).mp4"
     }
 }

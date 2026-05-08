@@ -16,6 +16,7 @@ The order follows the architecture's "Implementation order" section: build the c
 | 7 | **Resolution cap** | Cap output to per-preset long-edge pixels and retune bitrates to shrink files | [`phases/07-resolution-cap.md`](./phases/07-resolution-cap.md) |
 | 8 | **Encoder tuning** | Encoder hints + audio bitrate retune for additional savings on top of phase 7 | [`phases/08-encoder-tuning.md`](./phases/08-encoder-tuning.md) |
 | 9 | **Rename on export** | Always prompt with NSSavePanel so the user can choose filename and folder | [`phases/09-rename-on-export.md`](./phases/09-rename-on-export.md) |
+| 10 | **Drop `Rekam-` prefix** | Default filenames are just `<timestamp>.mp4` — less noise in Library and save panel | [`phases/10-drop-rekam-prefix.md`](./phases/10-drop-rekam-prefix.md) |
 
 ## Conventions for each phase doc
 

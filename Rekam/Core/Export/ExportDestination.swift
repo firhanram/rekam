@@ -11,7 +11,7 @@ enum ExportDestination {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd-HHmmss"
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        return "Rekam-\(formatter.string(from: now)).mp4"
+        return "\(formatter.string(from: now)).mp4"
     }
 
     /// Attempts to resolve a writable URL in ~/Downloads. On sandbox or write
