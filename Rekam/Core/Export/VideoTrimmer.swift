@@ -42,18 +42,31 @@ actor VideoTrimmer {
         }
 
         var compositionAudioTrackIDs: [CMPersistentTrackID] = []
-        for track in audioTracks {
-            let dest = composition.addMutableTrack(
-                withMediaType: .audio,
-                preferredTrackID: kCMPersistentTrackID_Invalid
-            )
-            try dest?.insertTimeRange(clampedRange, of: track, at: .zero)
-            if let dest { compositionAudioTrackIDs.append(dest.trackID) }
+        if !isMuted {
+            for track in audioTracks {
+                let dest = composition.addMutableTrack(
+                    withMediaType: .audio,
+                    preferredTrackID: kCMPersistentTrackID_Invalid
+                )
+                try dest?.insertTimeRange(clampedRange, of: track, at: .zero)
+                if let dest { compositionAudioTrackIDs.append(dest.trackID) }
+            }
         }
+
+        let clampedVolume = max(0, min(1, volume))
+        let needsAudioMix = !isMuted && clampedVolume < 1.0 && !compositionAudioTrackIDs.isEmpty
+        // AVAssetExportPresetPassthrough copies audio samples untouched and ignores audioMix.
+        // For partial-volume exports, fall back to HighestQuality so the mix is honored.
+        let resolvedPresetName: String = {
+            if needsAudioMix, preset.avPresetName == AVAssetExportPresetPassthrough {
+                return AVAssetExportPresetHighestQuality
+            }
+            return preset.avPresetName
+        }()
 
         guard let session = AVAssetExportSession(
             asset: composition,
-            presetName: preset.avPresetName
+            presetName: resolvedPresetName
         ) else {
             throw VideoTrimmerError.sessionCreationFailed
         }
@@ -62,13 +75,12 @@ actor VideoTrimmer {
             try FileManager.default.removeItem(at: destination)
         }
 
-        let effectiveVolume: Float = isMuted ? 0 : max(0, min(1, volume))
-        if effectiveVolume < 1.0, !compositionAudioTrackIDs.isEmpty {
+        if needsAudioMix {
             let audioMix = AVMutableAudioMix()
             audioMix.inputParameters = compositionAudioTrackIDs.map { trackID in
                 let params = AVMutableAudioMixInputParameters()
                 params.trackID = trackID
-                params.setVolume(effectiveVolume, at: .zero)
+                params.setVolume(clampedVolume, at: .zero)
                 return params
             }
             session.audioMix = audioMix
