@@ -16,12 +16,16 @@ final class TrimEditorViewModel {
     var currentSeconds: Double = 0
     var isPlaying: Bool = false
     var preset: ExportPreset = .passthrough
+    var volume: Double = 1.0
+    var isMuted: Bool = false
+    var hasAudio: Bool = false
     var exportProgress: Double?
     var exportedURL: URL?
     var errorMessage: String?
 
     @ObservationIgnored private let trimmer = VideoTrimmer()
     @ObservationIgnored private var timeObserver: Any?
+    @ObservationIgnored private var lastNonZeroVolume: Double = 1.0
 
     init(item: RecordingItem) {
         self.item = item
@@ -36,6 +40,7 @@ final class TrimEditorViewModel {
         self.endSeconds = safeDuration
 
         attachTimeObserver()
+        loadAudioAvailability(asset: asset)
     }
 
     deinit {
@@ -66,6 +71,39 @@ final class TrimEditorViewModel {
     func jumpToStart() { seek(to: startSeconds) }
     func jumpToEnd() { seek(to: endSeconds) }
 
+    func setVolume(_ value: Double) {
+        let clamped = max(0, min(1, value))
+        volume = clamped
+        if clamped > 0 {
+            lastNonZeroVolume = clamped
+            if isMuted { isMuted = false }
+        }
+        applyAudioToPlayer()
+    }
+
+    func toggleMute() {
+        isMuted.toggle()
+        if !isMuted, volume == 0 {
+            volume = lastNonZeroVolume > 0 ? lastNonZeroVolume : 1.0
+        }
+        applyAudioToPlayer()
+    }
+
+    private func applyAudioToPlayer() {
+        player.volume = Float(volume)
+        player.isMuted = isMuted
+    }
+
+    private func loadAudioAvailability(asset: AVURLAsset) {
+        Task { [weak self] in
+            let tracks = (try? await asset.loadTracks(withMediaType: .audio)) ?? []
+            let available = !tracks.isEmpty
+            await MainActor.run { [weak self] in
+                self?.hasAudio = available
+            }
+        }
+    }
+
     var canExport: Bool {
         endSeconds - startSeconds >= 0.1 && exportProgress == nil
     }
@@ -88,6 +126,8 @@ final class TrimEditorViewModel {
                 source: item.url,
                 range: range,
                 preset: preset,
+                volume: Float(volume),
+                isMuted: isMuted,
                 to: destination,
                 progress: { [weak self] p in
                     Task { @MainActor in self?.exportProgress = Double(p) }

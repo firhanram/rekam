@@ -68,6 +68,7 @@ struct TrimEditorView: View {
                 onScrub: { viewModel.seek(to: $0) }
             )
             transportRow
+            volumeRow
             exportRow
         }
         .padding(AppSpacing.lg)
@@ -129,6 +130,41 @@ struct TrimEditorView: View {
             .frame(maxWidth: 160)
             .disabled(viewModel.exportProgress != nil)
         }
+    }
+
+    private var volumeRow: some View {
+        let disabled = !viewModel.hasAudio || viewModel.exportProgress != nil
+        let muted = viewModel.isMuted || viewModel.volume == 0
+        let percent = Int((viewModel.volume * 100).rounded())
+        return HStack(spacing: AppSpacing.sm) {
+            Button {
+                viewModel.toggleMute()
+            } label: {
+                Image(systemName: muted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(muted ? AppColors.textTertiary : AppColors.textSecondary)
+                    .frame(width: 32, height: 32)
+                    .background(AppColors.surfacePlus)
+                    .clipShape(RoundedRectangle(cornerRadius: AppSpacing.radiusInput))
+            }
+            .buttonStyle(.plain)
+            .help(muted ? "Unmute" : "Mute")
+
+            Slider(
+                value: Binding(
+                    get: { viewModel.volume },
+                    set: { viewModel.setVolume($0) }
+                ),
+                in: 0...1
+            )
+
+            Text("\(muted ? 0 : percent)%")
+                .font(AppFonts.mono)
+                .foregroundStyle(AppColors.textTertiary)
+                .frame(width: 44, alignment: .trailing)
+        }
+        .disabled(disabled)
+        .opacity(disabled ? 0.5 : 1)
     }
 
     private func transportButton(systemImage: String, primary: Bool = false, action: @escaping () -> Void) -> some View {

@@ -16,6 +16,8 @@ actor VideoTrimmer {
         source: URL,
         range: CMTimeRange,
         preset: ExportPreset = .passthrough,
+        volume: Float = 1.0,
+        isMuted: Bool = false,
         to destination: URL,
         progress: ProgressHandler? = nil
     ) async throws -> URL {
@@ -38,12 +40,15 @@ actor VideoTrimmer {
             )
             try dest?.insertTimeRange(clampedRange, of: track, at: .zero)
         }
+
+        var compositionAudioTrackIDs: [CMPersistentTrackID] = []
         for track in audioTracks {
             let dest = composition.addMutableTrack(
                 withMediaType: .audio,
                 preferredTrackID: kCMPersistentTrackID_Invalid
             )
             try dest?.insertTimeRange(clampedRange, of: track, at: .zero)
+            if let dest { compositionAudioTrackIDs.append(dest.trackID) }
         }
 
         guard let session = AVAssetExportSession(
@@ -55,6 +60,18 @@ actor VideoTrimmer {
 
         if FileManager.default.fileExists(atPath: destination.path) {
             try FileManager.default.removeItem(at: destination)
+        }
+
+        let effectiveVolume: Float = isMuted ? 0 : max(0, min(1, volume))
+        if effectiveVolume < 1.0, !compositionAudioTrackIDs.isEmpty {
+            let audioMix = AVMutableAudioMix()
+            audioMix.inputParameters = compositionAudioTrackIDs.map { trackID in
+                let params = AVMutableAudioMixInputParameters()
+                params.trackID = trackID
+                params.setVolume(effectiveVolume, at: .zero)
+                return params
+            }
+            session.audioMix = audioMix
         }
 
         session.shouldOptimizeForNetworkUse = true
