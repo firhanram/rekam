@@ -4,6 +4,7 @@ import SwiftUI
 struct LibraryView: View {
     let viewModel: LibraryViewModel
     @State private var editingItem: RecordingItem?
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -50,6 +51,9 @@ struct LibraryView: View {
                         }
                         .buttonStyle(.plain)
                             .contextMenu {
+                                Button("Preview in New Window") {
+                                    openWindow(id: "preview", value: item.url)
+                                }
                                 Button("Open in Trim Editor") {
                                     editingItem = item
                                 }

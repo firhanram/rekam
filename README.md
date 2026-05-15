@@ -73,4 +73,4 @@ Screen recording itself is gated by TCC, not entitlements — approve once in **
 
 ## Status
 
-The app ships the full record → library → trim → export loop, plus polish (permission helpers, save-panel fallback, accessibility, keyboard shortcuts). Phases 7–12 documented under [`docs/phases/`](docs/phases/) cover size tuning, rename-on-export, the microphone picker, and the tab-switch fix.
+The app ships the full record → library → trim → export loop, plus polish (permission helpers, save-panel fallback, accessibility, keyboard shortcuts). Phases 7–13 documented under [`docs/phases/`](docs/phases/) cover size tuning, rename-on-export, the microphone picker, the tab-switch fix, and previewing recordings in standalone windows.

@@ -17,25 +17,31 @@ struct RecordingStore: Sendable {
 
         var items: [RecordingItem] = []
         for url in urls where url.pathExtension.lowercased() == "mp4" {
-            let resourceValues = try? url.resourceValues(forKeys: [.fileSizeKey, .creationDateKey])
-            let size = Int64(resourceValues?.fileSize ?? 0)
-            let createdAt = resourceValues?.creationDate ?? Date()
-
-            let asset = AVURLAsset(url: url)
-            let duration = (try? await asset.load(.duration)) ?? .zero
-
-            items.append(
-                RecordingItem(
-                    id: url,
-                    url: url,
-                    createdAt: createdAt,
-                    duration: duration,
-                    sizeBytes: size
-                )
-            )
+            if let item = await item(for: url) {
+                items.append(item)
+            }
         }
 
         return items.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func item(for url: URL) async -> RecordingItem? {
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+
+        let resourceValues = try? url.resourceValues(forKeys: [.fileSizeKey, .creationDateKey])
+        let size = Int64(resourceValues?.fileSize ?? 0)
+        let createdAt = resourceValues?.creationDate ?? Date()
+
+        let asset = AVURLAsset(url: url)
+        let duration = (try? await asset.load(.duration)) ?? .zero
+
+        return RecordingItem(
+            id: url,
+            url: url,
+            createdAt: createdAt,
+            duration: duration,
+            sizeBytes: size
+        )
     }
 
     func delete(_ item: RecordingItem) throws {
